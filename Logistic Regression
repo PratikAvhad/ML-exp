@@ -1,0 +1,67 @@
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+
+# Custom Logistic Regression Class
+class LogisticRegression:
+    def __init__(self):
+        # Initialize model parameters as an empty array (should be corrected)
+        self.params = np.zeros(int(np.random.random()), float)[:, np.newaxis]
+
+    def fit(self, X, y):
+        # Add bias (1s) to feature matrix
+        bias = np.ones(len(X))
+        X_bias = np.c_[bias, X]  # Concatenate bias with original features
+
+        # Least squares estimation: theta = (X^T X)^-1 X^T y
+        inner_part = np.transpose(X_bias) @ X_bias
+        inverse_part = np.linalg.inv(inner_part)
+        outer_part = inverse_part @ np.transpose(X_bias)
+        least_square_estimate = outer_part @ y
+
+        self.params = least_square_estimate  # Save model parameters
+        return self.params
+
+    def predict(self, X):
+        y_hat = []
+        # Add bias to test features
+        bias_testing = np.ones(len(X))
+        X_test = np.c_[bias_testing, X]
+
+        # Compute z = X * weights
+        z = X_test @ self.params
+
+        # Apply sigmoid function to convert to probability
+        sigmoid = 1 / (1 + np.exp(-z))
+
+        # Convert probability to binary class (0 or 1)
+        for _ in range(len(sigmoid)):
+            if sigmoid[_] >= 0.5:
+                y_hat.append(1)
+            else:
+                y_hat.append(0)
+
+        return sigmoid, y_hat
+
+if __name__ == '__main__':
+    # Load breast cancer dataset from sklearn
+    dataset = load_breast_cancer()
+    X = dataset.data        # Features
+    y = dataset.target      # Labels (0: benign, 1: malignant)
+
+    print(X.shape)          # Show shape of dataset
+
+    # Split dataset into training and testing parts
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+
+    # Create model object and train it
+    model = LogisticRegression()
+    parameters = model.fit(X_train, y_train)
+
+    # Predict using the model
+    sig, y_pred = model.predict(X_test)
+    print(f'The predicted outcome is {y_pred} and calculated sigmoid value is {sig}')
+
+    # Show one example result
+    print(f'First value of y_test : {y_test[14]} and first value of y_pred : {y_pred[14]}')
+    print(f'The sigmoid probability for the tested value : {sig[14]}')

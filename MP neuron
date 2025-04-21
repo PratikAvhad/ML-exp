@@ -1,0 +1,54 @@
+import numpy as np
+
+# Step 1: Generate a vector of inputs and weights
+np.random.seed(seed=0)  # For consistent results every time you run it
+I = np.random.choice([0, 1], 3)  # Input vector with binary values (0 or 1)
+W = np.random.choice([-1, 1], 3)  # Weight vector with values -1 or 1
+
+print(f'Input vector: {I}, Weight vector: {W}')
+
+# Step 2: Compute the dot product between the input and weights
+dot = I @ W
+print(f'Dot product: {dot}')
+
+# Step 3: Define the threshold activation function
+def linear_threshold_gate(dot: int, T: float) -> int:
+    if dot >= T:
+        return 1
+    else:
+        return 0
+
+# Step 4: Compute the output using different threshold values
+T = 1
+activation = linear_threshold_gate(dot, T)
+print(f'Activation with threshold {T}: {activation}')
+
+T = 3
+activation = linear_threshold_gate(dot, T)
+print(f'Activation with threshold {T}: {activation}')
+
+# Application: Boolean algebra using McCulloch-Pitts neuron (AND gate simulation)
+
+# Define a 2-input truth table (AND gate inputs)
+input_table = np.array([
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1]
+])
+print(f'Input table:\n{input_table}')
+
+# Assign weights (for AND gate logic)
+weights = np.array([1, 1])
+print(f'Weights: {weights}')
+
+# Compute dot products for each input combination
+dot_products = input_table @ weights
+print(f'Dot products: {dot_products}')
+
+# Use threshold = 2 (only input [1,1] will activate)
+T = 2
+print(f'Output with threshold {T}:')
+for i in range(4):
+    activation = linear_threshold_gate(dot_products[i], T)
+    print(f'Input: {input_table[i]}, Activation: {activation}')

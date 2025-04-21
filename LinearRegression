@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class LinearRegression:
     def __init__(self):
@@ -7,17 +8,15 @@ class LinearRegression:
         self.b_1 = 0  # Slope
 
     def fit(self, X, y):
-        """
-        Fit the linear regression model to the training data.
-        Uses the least squares method to calculate b_0 and b_1.
-        """
+        # Fit the linear regression model to the training data
+        # Uses the least squares method to calculate b_0 and b_1
         X_mean = np.mean(X)  # Mean of input features
         y_mean = np.mean(y)  # Mean of output values
 
         ssxy, ssx = 0, 0  # Sum of products and sum of squares
         for i in range(len(X)):
             ssxy += (X[i] - X_mean) * (y[i] - y_mean)  # ∑(x - x̄)(y - ȳ)
-            ssx += (X[i] - X_mean)**2                 # ∑(x - x̄)²
+            ssx += (X[i] - X_mean)**2  # ∑(x - x̄)²
 
         # Calculate slope (b_1) and intercept (b_0)
         self.b_1 = ssxy / ssx
@@ -26,10 +25,8 @@ class LinearRegression:
         return self.b_0, self.b_1
 
     def predict(self, X):
-        """
-        Predict the output values for given input X using the model.
-        Formula: y = b_0 + b_1 * x
-        """
+        # Predict the output values for given input X using the model
+        # Formula: y = b_0 + b_1 * x
         X = np.array(X)  # Ensure input is in NumPy array format
         y_hat = self.b_0 + (X * self.b_1)  # Vectorized prediction
         return y_hat
@@ -50,4 +47,24 @@ if __name__ == '__main__':
 
     # Predict weight for a new height (161 cm)
     y_pred = model.predict([161])
-    print(y_pred)  # Output the prediction
+    print(f"Predicted weight for height 161 cm: {y_pred[0]} kg")  # Output the prediction
+
+    # Plotting the data points and the regression line
+    plt.figure(figsize=(8, 6))
+    
+    # Scatter plot of the original data points
+    plt.scatter(X, y, color='blue', label='Data Points')
+
+    # Plot the regression line
+    # We can plot the line for all X values in the range of the data
+    X_line = np.linspace(min(X), max(X), 100).reshape(-1, 1)
+    y_line = model.predict(X_line)
+
+    plt.plot(X_line, y_line, color='red', label='Regression Line')
+
+    plt.title('Linear Regression: Height vs Weight')
+    plt.xlabel('Height (cm)')
+    plt.ylabel('Weight (kg)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

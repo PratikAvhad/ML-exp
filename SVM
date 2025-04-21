@@ -1,71 +1,57 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
+from sklearn.metrics import classification_report  # <-- added
 
-# SVM class implementation
 class SVM:
 
-    # Constructor to initialize the model parameters
     def __init__(self, learning_rate=0.001, lambda_param=0.01, n_iters=1000):
-        self.lr = learning_rate            # Learning rate for gradient descent
-        self.lambda_param = lambda_param  # Regularization strength
-        self.n_iters = n_iters            # Number of iterations (epochs)
-        self.w = None                     # Weight vector
-        self.b = None                     # Bias term
+        self.lr = learning_rate
+        self.lambda_param = lambda_param
+        self.n_iters = n_iters
+        self.w = None
+        self.b = None
 
-    # Training the model using the hinge loss function and gradient descent
     def fit(self, X, y):
         n_samples, n_features = X.shape
-
-        # Convert labels: assume 0 => -1, and 1 => 1 for SVM requirement
         y_ = np.where(y <= 0, -1, 1)
 
-        # Initialize weights and bias to zeros
         self.w = np.zeros(n_features)
         self.b = 0
 
-        # Training loop for specified number of iterations
         for _ in range(self.n_iters):
             for idx, x_i in enumerate(X):
-                # Check if the point is classified correctly with margin >= 1
                 condition = y_[idx] * (np.dot(x_i, self.w) - self.b) >= 1
                 if condition:
-                    # If correctly classified, apply only regularization gradient
                     self.w -= self.lr * (2 * self.lambda_param * self.w)
                 else:
-                    # If misclassified, update weights and bias using the hinge loss gradient
                     self.w -= self.lr * (2 * self.lambda_param * self.w - np.dot(x_i, y_[idx]))
                     self.b -= self.lr * y_[idx]
 
-    # Predict the class for each input sample
     def predict(self, X):
         approx = np.dot(X, self.w) - self.b
-        return np.sign(approx)  # Return -1 or 1 based on which side of the margin
+        return np.sign(approx)
 
-# Main code to test SVM
+
 if __name__ == "__main__":
-
-    # Create a simple synthetic 2-class dataset
+    # Create a synthetic binary classification dataset
     X, y = datasets.make_blobs(
         n_samples=50, n_features=2, centers=2, cluster_std=1.05, random_state=40
     )
-    y = np.where(y == 0, -1, 1)  # Convert labels from (0, 1) to (-1, 1)
+    y = np.where(y == 0, -1, 1)
 
-    # Split dataset into training and testing sets
+    # Split the data into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=123
     )
 
-    # Initialize and train the SVM model
+    # Train the custom SVM
     clf = SVM()
     clf.fit(X_train, y_train)
 
-    # Predict on the test set
+    # Make predictions
     predictions = clf.predict(X_test)
 
-    # Accuracy calculation function
-    def accuracy(y_true, y_pred):
-        accuracy = np.sum(y_true == y_pred) / len(y_true)
-        return accuracy
-
-    print(f"SVM classification accuracy : {accuracy(y_test, predictions)}")
+    # Print classification report
+    print("Classification Report:\n")
+    print(classification_report(y_test, predictions, target_names=["Class -1", "Class 1"]))

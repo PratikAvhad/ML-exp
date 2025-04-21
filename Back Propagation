@@ -1,0 +1,109 @@
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
+# Loading the Iris dataset
+data = load_iris()  # Load the dataset from sklearn
+X = data.data  # Features (sepal length, sepal width, petal length, petal width)
+y = data.target  # Target labels (3 species of iris)
+
+# Split dataset into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=20, random_state=4)
+
+# Hyperparameters for the neural network
+learning_rate = 0.1  # Learning rate for weight updates
+iterations = 5000  # Number of iterations (epochs) for training
+N = y_train.size  # Number of training samples
+input_size = 4  # Input layer size (4 features per sample)
+hidden_size = 2  # Number of neurons in the hidden layer
+output_size = 3  # Output layer size (3 classes for the target variable)
+
+# Initialize weights with small random values
+np.random.seed(10)
+W1 = np.random.normal(scale=0.5, size=(input_size, hidden_size))  # Weight matrix for input to hidden layer
+W2 = np.random.normal(scale=0.5, size=(hidden_size, output_size))  # Weight matrix for hidden to output layer
+
+# Helper functions
+
+# Sigmoid activation function
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# Mean Squared Error (MSE) function for calculating loss
+def mean_squared_error(y_pred, y_true):
+    # One-hot encode y_true (convert label [0, 1, 2] into one-hot vectors)
+    y_true_one_hot = np.eye(output_size)[y_true]
+    
+    # Reshape y_true_one_hot to match the shape of y_pred
+    y_true_reshaped = y_true_one_hot.reshape(y_pred.shape)
+    
+    # Compute the Mean Squared Error between predicted and true values
+    error = ((y_pred - y_true_reshaped)**2).sum() / (2 * y_pred.size)
+    return error
+
+# Function to compute accuracy
+def accuracy(y_pred, y_true):
+    # Compare the predicted class with the true class
+    acc = y_pred.argmax(axis=1) ==  y_true.argmax(axis=1)
+    return acc.mean()
+
+# Dataframe to store the results (MSE and accuracy)
+results = pd.DataFrame(columns=["mse", "accuracy"])
+
+# Training loop (backpropagation)
+
+for itr in range(iterations):
+    # Feedforward propagation
+
+    # Calculate the weighted sum of inputs for the hidden layer
+    Z1 = np.dot(X_train, W1)  # X_train * W1 gives input to hidden layer
+    A1 = sigmoid(Z1)  # Apply sigmoid activation function to get activations of hidden layer
+    
+    # Calculate the weighted sum of hidden layer activations for the output layer
+    Z2 = np.dot(A1, W2)  # A1 * W2 gives input to output layer
+    A2 = sigmoid(Z2)  # Apply sigmoid activation function to get activations of output layer
+
+    # Calculate the Mean Squared Error for the predicted output
+    mse = mean_squared_error(A2, y_train)
+    acc = accuracy(np.eye(output_size)[y_train], A2)  # Calculate accuracy
+    new_row = pd.DataFrame({"mse": [mse], "accuracy": [acc]})  # Store current results in a new row
+    results = pd.concat([results, new_row], ignore_index=True)  # Append the new row to the results dataframe
+
+    # Backpropagation
+
+    # Calculate the error at the output layer
+    E1 = A2 - np.eye(output_size)[y_train]  # Difference between predicted output and true labels (one-hot encoded)
+    
+    # Derivative of the output layer activations (for updating W2)
+    dW1 = E1 * A2 * (1 - A2)  # Applying derivative of sigmoid function
+    E2 = np.dot(dW1, W2.T)  # Error propagated backward to the hidden layer
+    dW2 = E2 * A1 * (1 - A1)  # Applying derivative of sigmoid function for hidden layer
+
+    # Update weights using gradient descent
+    W2_update = np.dot(A1.T, dW1) / N  # Gradient for W2 (hidden to output layer)
+    W1_update = np.dot(X_train.T, dW2) / N  # Gradient for W1 (input to hidden layer)
+    W2 = W2 - learning_rate * W2_update  # Update W2 with the calculated gradient
+    W1 = W1 - learning_rate * W1_update  # Update W1 with the calculated gradient
+
+# Visualizing the results
+# Plot Mean Squared Error (MSE) over the iterations
+results.mse.plot(title="Mean Squared Error")
+plt.show()
+
+# Plot Accuracy over the iterations
+results.accuracy.plot(title="Accuracy")
+plt.show()
+
+# Testing the model on the test set
+
+# Feedforward propagation for the test data
+Z1 = np.dot(X_test, W1)  # Calculate input to hidden layer for test data
+A1 = sigmoid(Z1)  # Get hidden layer activations
+Z2 = np.dot(A1, W2)  # Calculate input to output layer for test data
+A2 = sigmoid(Z2)  # Get output layer activations
+
+# Calculate accuracy on test data
+test_acc = accuracy(np.eye(output_size)[y_test], A2)
+print("Test accuracy: {}".format(test_acc))

@@ -1,0 +1,53 @@
+import numpy as np
+
+class LinearRegression:
+    def __init__(self):
+        # Initialize coefficients (intercept b_0 and slope b_1) to 0
+        self.b_0 = 0  # Intercept
+        self.b_1 = 0  # Slope
+
+    def fit(self, X, y):
+        """
+        Fit the linear regression model to the training data.
+        Uses the least squares method to calculate b_0 and b_1.
+        """
+        X_mean = np.mean(X)  # Mean of input features
+        y_mean = np.mean(y)  # Mean of output values
+
+        ssxy, ssx = 0, 0  # Sum of products and sum of squares
+        for i in range(len(X)):
+            ssxy += (X[i] - X_mean) * (y[i] - y_mean)  # ∑(x - x̄)(y - ȳ)
+            ssx += (X[i] - X_mean)**2                 # ∑(x - x̄)²
+
+        # Calculate slope (b_1) and intercept (b_0)
+        self.b_1 = ssxy / ssx
+        self.b_0 = y_mean - (self.b_1 * X_mean)
+
+        return self.b_0, self.b_1
+
+    def predict(self, X):
+        """
+        Predict the output values for given input X using the model.
+        Formula: y = b_0 + b_1 * x
+        """
+        X = np.array(X)  # Ensure input is in NumPy array format
+        y_hat = self.b_0 + (X * self.b_1)  # Vectorized prediction
+        return y_hat
+
+if __name__ == '__main__':
+    # Sample input features (X: heights in cm)
+    X = np.array([173, 182, 165, 154, 170], ndmin=2)  # Create 2D array
+    X = X.reshape(5, 1)  # Reshape to ensure it's 2D with 5 rows, 1 column
+
+    # Corresponding output values (y: weights in kg)
+    y = np.array([68, 79, 65, 57, 64])
+
+    # Create model instance
+    model = LinearRegression()
+
+    # Train the model with the data
+    model.fit(X, y)
+
+    # Predict weight for a new height (161 cm)
+    y_pred = model.predict([161])
+    print(y_pred)  # Output the prediction

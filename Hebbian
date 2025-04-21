@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+learning_rate = 0.01
+epochs = 100
+
+# Input Data for AND Gate
+X = np.array([
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1]
+])
+
+# Target Output
+y = np.array([0, 0, 0, 1])
+
+# Initialize weights and bias randomly
+weights = np.random.rand(2)
+bias = np.random.rand()
+
+# Activation function (step function)
+def activation_function(x):
+    return 1 if x >= 0 else 0
+
+# Training loop using Hebbian learning rule
+for epoch in range(epochs):
+    for i in range(len(X)):
+        input_vector = X[i]
+        target = y[i]
+
+        # Calculate the weighted sum of inputs and bias
+        weighted_sum = np.dot(weights, input_vector) + bias
+
+        # Apply activation function to get output
+        output = activation_function(weighted_sum)
+
+        # Hebbian learning update (only reinforces if output is 1)
+        delta_w = learning_rate * input_vector * output
+        delta_b = learning_rate * output
+
+        # Update weights and bias
+        weights += delta_w
+        bias += delta_b
+
+# Print the final trained weights and bias
+print("Trained Weights:", weights)
+print("Trained Bias:", bias)
+
+# Test the model on the same inputs
+print("\nTesting the trained model:")
+for i in range(len(X)):
+    input_vector = X[i]
+    weighted_sum = np.dot(weights, input_vector) + bias
+    output = activation_function(weighted_sum)
+    print(f"Input: {input_vector}, Predicted Output: {output}")

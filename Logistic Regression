@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 
@@ -65,3 +66,13 @@ if __name__ == '__main__':
     # Show one example result
     print(f'First value of y_test : {y_test[14]} and first value of y_pred : {y_pred[14]}')
     print(f'The sigmoid probability for the tested value : {sig[14]}')
+
+    # Plotting the predicted probabilities (sigmoid) against the true labels
+    plt.figure(figsize=(10, 6))
+    plt.scatter(np.arange(len(y_test)), sig, color='blue', label='Predicted Probabilities')
+    plt.scatter(np.arange(len(y_test)), y_test, color='red', label='True Labels', alpha=0.5)
+    plt.title('Predicted Probabilities vs True Labels')
+    plt.xlabel('Test Sample Index')
+    plt.ylabel('Probability / True Label')
+    plt.legend()
+    plt.show()
